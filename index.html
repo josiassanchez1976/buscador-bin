@@ -171,6 +171,7 @@
           </div>
         </div>
         <button type="submit">Buscar</button>
+        <button type="button" id="clearBtn" style="margin-left:0.5rem;">Limpiar</button>
       </form>
       <div class="results-meta hidden" id="resultsMeta"></div>
       <!-- Export controls: allow users to choose which fields to include in the downloaded results -->
@@ -383,6 +384,25 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+    });
+
+    // agregar manejador para limpiar los filtros y resultados
+    document.getElementById('clearBtn').addEventListener('click', function() {
+      // resetear todos los campos del formulario
+      document.getElementById('searchForm').reset();
+      // vaciar resultados almacenados
+      lastResults = [];
+      // ocultar resultados y meta
+      const meta = document.getElementById('resultsMeta');
+      meta.classList.add('hidden');
+      meta.textContent = '';
+      const table = document.getElementById('resultsTable');
+      const tbody = table.querySelector('tbody');
+      tbody.innerHTML = '';
+      table.classList.add('hidden');
+      // ocultar controles de exportación
+      const exportCtrls3 = document.getElementById('exportControls');
+      if (exportCtrls3) exportCtrls3.classList.add('hidden');
     });
     loadData();
   </script>
