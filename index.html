@@ -474,8 +474,8 @@
               const btn = document.createElement('button');
               btn.type = 'button';
               btn.textContent = match;
-              btn.addEventListener('click', () => {
-                input.value = match;
+              btn.addEventListener('mousedown', () => {
+                input.value = matc;
                 suggestionBox.classList.remove('visible');
                 suggestionBox.innerHTML = '';
                 state.autocomplete[inputId].activeIndex = -1;
