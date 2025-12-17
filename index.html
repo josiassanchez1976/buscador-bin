@@ -58,6 +58,11 @@
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       margin-bottom: 1rem;
     }
+
+  /* Ensure input groups are positioned relative so autocomplete dropdowns anchor properly */
+  .input-group {
+    position: relative;
+  }
     .input-group {
       display: flex;
       flex-direction: column;
@@ -231,6 +236,74 @@
     function normalize(str) {
       return (str || '').toString().trim().toLowerCase();
     }
+
+    /**
+     * Set up a simple autocomplete dropdown for an input element using a list of values.
+     * This helper creates a suggestions container positioned under the input. It
+     * filters the provided values on every input event (case-insensitive substring)
+     * and displays up to 10 matches. Clicking a suggestion fills the input and
+     * hides the dropdown. Suggestions are hidden when clicking outside.
+     *
+     * @param {string} inputId The id of the input element to attach autocomplete to
+     * @param {string[]} values A list of possible values for suggestions
+     */
+    function addAutocomplete(inputId, values) {
+      const inputEl = document.getElementById(inputId);
+      // Guard: only attach if input exists and values array provided
+      if (!inputEl || !Array.isArray(values)) return;
+      // Create suggestions container
+      const container = document.createElement('div');
+      container.className = 'autocomplete-suggestions hidden';
+      // Basic inline styling for dropdown
+      container.style.position = 'absolute';
+      container.style.top = '100%';
+      container.style.left = '0';
+      container.style.right = '0';
+      container.style.background = '#fff';
+      container.style.border = '1px solid var(--border)';
+      container.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+      container.style.maxHeight = '180px';
+      container.style.overflowY = 'auto';
+      container.style.zIndex = '2000';
+      inputEl.parentElement.appendChild(container);
+      // Filter and render suggestions
+      function showSuggestions(query) {
+        container.innerHTML = '';
+        const q = normalize(query);
+        if (!q) {
+          container.classList.add('hidden');
+          return;
+        }
+        // Filter values by substring match (case-insensitive)
+        const matches = values.filter(val => normalize(val).includes(q)).slice(0, 10);
+        if (matches.length === 0) {
+          container.classList.add('hidden');
+          return;
+        }
+        matches.forEach(val => {
+          const item = document.createElement('div');
+          item.textContent = val;
+          item.style.padding = '4px 8px';
+          item.style.cursor = 'pointer';
+          item.addEventListener('mousedown', () => {
+            inputEl.value = val;
+            container.classList.add('hidden');
+          });
+          container.appendChild(item);
+        });
+        container.classList.remove('hidden');
+      }
+      // Event listeners
+      inputEl.addEventListener('input', () => {
+        showSuggestions(inputEl.value);
+      });
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', (evt) => {
+        if (evt.target !== inputEl && !container.contains(evt.target)) {
+          container.classList.add('hidden');
+        }
+      });
+    }
     function buildUniqueLists() {
       const sets = {
         CountryName: new Set(),
@@ -276,6 +349,16 @@
         populateList('brandList', lists.Brand);
         populateList('typeList', lists.Type);
         populateList('categoryList', lists.Category);
+
+        // Attach custom autocomplete to each filter input using unique lists. This
+        // enhances browser datalist behaviour and ensures suggestions are visible
+        // even with large option sets. Note: the browser's native datalist is
+        // still present but may not show for some users.
+        addAutocomplete('countryInput', lists.CountryName);
+        addAutocomplete('issuerInput', lists.Issuer);
+        addAutocomplete('brandInput', lists.Brand);
+        addAutocomplete('typeInput', lists.Type);
+        addAutocomplete('categoryInput', lists.Category);
       } catch (err) {
         statusEl.textContent = 'Error al cargar datos';
         console.error(err);
