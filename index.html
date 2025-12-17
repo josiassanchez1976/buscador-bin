@@ -476,10 +476,10 @@
               btn.textContent = match;
               btn.addEventListener('mousedown', () => {
                 input.value = match;
-                suggestionBox.classList.remove('visible');
+                suggestionBox// .classList.remove('visible');
                 suggestionBox.innerHTML = '';
                 state.autocomplete[inputId].activeIndex = -1;
-                runSearch();
+          ////// // // ////  // //   // ();
               });
               suggestionBox.appendChild(btn);
               if (index === state.autocomplete[inputId].activeIndex) {
