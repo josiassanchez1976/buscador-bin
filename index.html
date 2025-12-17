@@ -26,7 +26,7 @@
       line-height: 1.6;
     }
     header {
-      padding: 2rem;
+      padding: 2.5rem 1.5rem 2rem;
       text-align: center;
       background: linear-gradient(120deg, #111827, #1e3a8a);
       color: #fff;
@@ -34,23 +34,26 @@
     }
     header h1 {
       margin: 0 0 0.5rem;
-      font-size: 2rem;
+      font-size: 2.2rem;
+      letter-spacing: -0.02em;
     }
     header p {
       margin: 0;
-      color: rgba(255,255,255,0.8);
+      color: rgba(255,255,255,0.82);
     }
     main {
       max-width: 1200px;
-      margin: -60px auto 0;
-      padding: 1rem;
+      margin: 0 auto 2rem;
+      padding: 1.5rem 1.25rem 2rem;
     }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 1.5rem;
+      border-radius: 14px;
+      padding: 1.75rem;
       box-shadow: var(--shadow);
+      position: relative;
+      z-index: 1;
     }
     .filter-grid {
       display: grid;
@@ -59,51 +62,113 @@
       margin-bottom: 1rem;
     }
 
-  /* Ensure input groups are positioned relative so autocomplete dropdowns anchor properly */
-  .input-group {
-    position: relative;
-  }
+    /* Ensure input groups are positioned relative so autocomplete dropdowns anchor properly */
     .input-group {
+      position: relative;
       display: flex;
       flex-direction: column;
+      gap: 0.4rem;
     }
     .input-group label {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--muted);
+      font-size: 0.93rem;
     }
     .input-group input {
-      padding: 0.5rem;
+      padding: 0.65rem 0.75rem;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.9rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      background: #fdfdff;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .input-group input:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+      background: #fff;
+    }
+    .form-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
     }
     button {
-      padding: 0.75rem 1.5rem;
+      padding: 0.85rem 1.6rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--accent);
       color: #fff;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.18);
     }
     button:hover {
       background: #1749b8;
+      transform: translateY(-1px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    button.secondary {
+      background: #111827;
+      box-shadow: 0 10px 25px rgba(17, 24, 39, 0.15);
+    }
+    button.secondary:hover {
+      background: #0b1221;
+    }
+    .status-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 12px;
+      background: #f0f4ff;
+      color: #1d3a8a;
+      font-weight: 600;
+      margin-bottom: 1rem;
     }
     .results-meta {
       margin: 1rem 0;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: var(--muted);
+      font-weight: 600;
+    }
+    #exportControls {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem 0.85rem;
+      margin: 1rem 0;
+    }
+    #exportControls span {
+      font-weight: 700;
+      color: var(--muted);
+      margin-right: 0.25rem;
+    }
+    #exportControls label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 600;
+    }
+    #exportControls button {
+      padding: 0.75rem 1.2rem;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 1rem;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
     }
     th, td {
       border: 1px solid var(--border);
@@ -114,12 +179,54 @@
     th {
       background: var(--bg);
       font-weight: 600;
+      letter-spacing: -0.01em;
     }
     tbody tr:nth-child(even) {
       background: #f8f9fb;
     }
     .hidden {
       display: none;
+    }
+    .autocomplete-suggestions {
+      position: absolute;
+      inset: auto 0 auto 0;
+      top: 100%;
+      background: #fff;
+      border: 1px solid var(--border);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      max-height: 180px;
+      overflow-y: auto;
+      border-radius: 10px;
+      padding: 0.3rem 0;
+      z-index: 20;
+    }
+    .autocomplete-item {
+      padding: 0.55rem 0.75rem;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .autocomplete-item:hover {
+      background: rgba(37, 99, 235, 0.08);
+      color: #0f172a;
+    }
+    @media (max-width: 720px) {
+      header h1 {
+        font-size: 1.85rem;
+      }
+      .card {
+        padding: 1.25rem;
+      }
+      .filter-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      }
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+      .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
     }
   </style>
 </head>
@@ -130,7 +237,7 @@
   </header>
   <main>
     <div class="card">
-      <div id="loadStatus" style="margin-bottom:0.5rem;">Cargando datos...</div>
+      <div id="loadStatus" class="status-bar">Cargando datos...</div>
       <form id="searchForm">
         <div class="filter-grid">
           <div class="input-group">
@@ -139,28 +246,23 @@
           </div>
           <div class="input-group">
             <label for="countryInput">País</label>
-            <input id="countryInput" type="text" list="countryList" placeholder="Ej. United States">
-            <datalist id="countryList"></datalist>
+            <input id="countryInput" type="text" placeholder="Ej. United States">
           </div>
           <div class="input-group">
             <label for="issuerInput">Banco / Issuer</label>
-            <input id="issuerInput" type="text" list="issuerList" placeholder="Ej. JPMorgan Chase">
-            <datalist id="issuerList"></datalist>
+            <input id="issuerInput" type="text" placeholder="Ej. JPMorgan Chase">
           </div>
           <div class="input-group">
             <label for="brandInput">Marca de tarjeta</label>
-            <input id="brandInput" type="text" list="brandList" placeholder="Ej. Visa">
-            <datalist id="brandList"></datalist>
+            <input id="brandInput" type="text" placeholder="Ej. Visa">
           </div>
           <div class="input-group">
             <label for="typeInput">Tipo</label>
-            <input id="typeInput" type="text" list="typeList" placeholder="Credit, Debit, Prepaid...">
-            <datalist id="typeList"></datalist>
+            <input id="typeInput" type="text" placeholder="Credit, Debit, Prepaid...">
           </div>
           <div class="input-group">
             <label for="categoryInput">Categoría / Nivel</label>
-            <input id="categoryInput" type="text" list="categoryList" placeholder="Classic, Platinum...">
-            <datalist id="categoryList"></datalist>
+            <input id="categoryInput" type="text" placeholder="Classic, Platinum...">
           </div>
           <div class="input-group">
             <label for="iso2Input">Código ISO2</label>
@@ -175,13 +277,15 @@
             <input id="phoneInput" type="text" placeholder="Coincidencia parcial">
           </div>
         </div>
-        <button type="submit">Buscar</button>
-        <button type="button" id="clearBtn" style="margin-left:0.5rem;">Limpiar</button>
+        <div class="form-actions">
+          <button type="submit">Buscar</button>
+          <button type="button" id="clearBtn" class="secondary">Limpiar</button>
+        </div>
       </form>
       <div class="results-meta hidden" id="resultsMeta"></div>
       <!-- Export controls: allow users to choose which fields to include in the downloaded results -->
-      <div id="exportControls" class="hidden" style="margin: 1rem 0;">
-        <span>Selecciona columnas para exportar:</span><br>
+      <div id="exportControls" class="hidden">
+        <span>Selecciona columnas para exportar:</span>
         <label><input type="checkbox" class="export-field" data-field="BIN" checked> BIN</label>
         <label><input type="checkbox" class="export-field" data-field="Brand" checked> Marca</label>
         <label><input type="checkbox" class="export-field" data-field="Type" checked> Tipo</label>
@@ -191,7 +295,7 @@
         <label><input type="checkbox" class="export-field" data-field="CountryName" checked> País</label>
         <label><input type="checkbox" class="export-field" data-field="isoCode2" checked> ISO2</label>
         <label><input type="checkbox" class="export-field" data-field="isoCode3" checked> ISO3</label>
-        <button id="exportButton" type="button" style="margin-left:0.5rem;">Descargar</button>
+        <button id="exportButton" type="button">Descargar</button>
       </div>
       <div style="overflow-x:auto;">
         <table id="resultsTable" class="hidden">
@@ -251,43 +355,35 @@
       const inputEl = document.getElementById(inputId);
       // Guard: only attach if input exists and values array provided
       if (!inputEl || !Array.isArray(values)) return;
+      inputEl.setAttribute('autocomplete', 'off');
+      inputEl.setAttribute('spellcheck', 'false');
       // Create suggestions container
       const container = document.createElement('div');
       container.className = 'autocomplete-suggestions hidden';
-      // Basic inline styling for dropdown
-      container.style.position = 'absolute';
-      container.style.top = '100%';
-      container.style.left = '0';
-      container.style.right = '0';
-      container.style.background = '#fff';
-      container.style.border = '1px solid var(--border)';
-      container.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
-      container.style.maxHeight = '180px';
-      container.style.overflowY = 'auto';
-      container.style.zIndex = '2000';
       inputEl.parentElement.appendChild(container);
+      const hideSuggestions = () => {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+      };
       // Filter and render suggestions
       function showSuggestions(query) {
-        container.innerHTML = '';
         const q = normalize(query);
         if (!q) {
-          container.classList.add('hidden');
-          return;
+          return hideSuggestions();
         }
+        container.innerHTML = '';
         // Filter values by substring match (case-insensitive)
         const matches = values.filter(val => normalize(val).includes(q)).slice(0, 10);
         if (matches.length === 0) {
-          container.classList.add('hidden');
-          return;
+          return hideSuggestions();
         }
         matches.forEach(val => {
           const item = document.createElement('div');
+          item.className = 'autocomplete-item';
           item.textContent = val;
-          item.style.padding = '4px 8px';
-          item.style.cursor = 'pointer';
           item.addEventListener('mousedown', () => {
             inputEl.value = val;
-            container.classList.add('hidden');
+            hideSuggestions();
           });
           container.appendChild(item);
         });
@@ -297,10 +393,20 @@
       inputEl.addEventListener('input', () => {
         showSuggestions(inputEl.value);
       });
+      inputEl.addEventListener('focus', () => {
+        if (inputEl.value.trim().length === 0) {
+          hideSuggestions();
+        } else {
+          showSuggestions(inputEl.value);
+        }
+      });
+      inputEl.addEventListener('keydown', (evt) => {
+        if (evt.key === 'Escape') hideSuggestions();
+      });
       // Hide suggestions when clicking outside
       document.addEventListener('click', (evt) => {
         if (evt.target !== inputEl && !container.contains(evt.target)) {
-          container.classList.add('hidden');
+          hideSuggestions();
         }
       });
     }
@@ -312,12 +418,18 @@
         Type: new Set(),
         Category: new Set()
       };
+      const clean = (val) => (val || '').toString().trim();
       dataset.forEach(row => {
-        if (row.CountryName) sets.CountryName.add(row.CountryName);
-        if (row.Issuer) sets.Issuer.add(row.Issuer);
-        if (row.Brand) sets.Brand.add(row.Brand);
-        if (row.Type) sets.Type.add(row.Type);
-        if (row.Category) sets.Category.add(row.Category);
+        const country = clean(row.CountryName);
+        const issuer = clean(row.Issuer);
+        const brand = clean(row.Brand);
+        const type = clean(row.Type);
+        const category = clean(row.Category);
+        if (country) sets.CountryName.add(country);
+        if (issuer) sets.Issuer.add(issuer);
+        if (brand) sets.Brand.add(brand);
+        if (type) sets.Type.add(type);
+        if (category) sets.Category.add(category);
       });
       const lists = {};
       Object.keys(sets).forEach(key => {
@@ -335,25 +447,7 @@
         dataset = parseCSV(text);
         statusEl.textContent = 'Datos cargados (' + dataset.length + ' registros)';
         const lists = buildUniqueLists();
-        // populate datalists
-        function populateList(id, values) {
-          const dl = document.getElementById(id);
-          values.forEach(val => {
-            const option = document.createElement('option');
-            option.value = val;
-            dl.appendChild(option);
-          });
-        }
-        populateList('countryList', lists.CountryName);
-        populateList('issuerList', lists.Issuer);
-        populateList('brandList', lists.Brand);
-        populateList('typeList', lists.Type);
-        populateList('categoryList', lists.Category);
-
-        // Attach custom autocomplete to each filter input using unique lists. This
-        // enhances browser datalist behaviour and ensures suggestions are visible
-        // even with large option sets. Note: the browser's native datalist is
-        // still present but may not show for some users.
+        // Attach custom autocomplete to each filter input using unique lists.
         addAutocomplete('countryInput', lists.CountryName);
         addAutocomplete('issuerInput', lists.Issuer);
         addAutocomplete('brandInput', lists.Brand);
