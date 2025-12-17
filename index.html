@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Buscador de BIN</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        line-height: 1.5;
+      }
+      h1 {
+        margin-bottom: 1rem;
+      }
+      input {
+        padding: 0.5rem;
+        font-size: 1rem;
+        width: 12rem;
+      }
+      button {
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        margin-left: 0.5rem;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 0.5rem;
+        text-align: left;
+      }
+      th {
+        background-color: #f7f7f7;
+      }
+      #loading {
+        margin-top: 1rem;
+        font-style: italic;
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Buscador de BIN</h1>
+    <p>
+      Esta página permite buscar números de identificación bancaria (BIN) en la base de
+      datos suministrada. Introduce al menos 6 dígitos y presiona “Buscar”. La
+      carga inicial de datos puede tardar unos segundos debido al tamaño del
+      archivo.
+    </p>
+    <input type="text" id="binInput" placeholder="Introduce el BIN" />
+    <button onclick="searchBin()">Buscar</button>
+    <div id="loading">Cargando datos...</div>
+    <div id="results"></div>
+
+    <!-- Incluimos PapaParse para procesar el CSV en el navegador -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script>
+      // Array para almacenar todas las filas del CSV una vez cargado.
+      let data = [];
+      // Cargar el archivo CSV bin-list-data.csv utilizando PapaParse. Este archivo
+      // ha sido reducido para no incluir la columna "IssuerUrl" y así cumplir
+      // con el límite de carga de GitHub (<25 MB).
+      Papa.parse('bin-list-data.csv', {
+        download: true,
+        header: true,
+        dynamicTyping: false,
+        skipEmptyLines: true,
+        complete: function (results) {
+          data = results.data;
+          // Una vez completada la carga, ocultamos el mensaje de carga.
+          document.getElementById('loading').style.display = 'none';
+        },
+        error: function () {
+          document.getElementById('loading').textContent =
+            'Error al cargar el archivo de datos.';
+        },
+      });
+
+      /**
+       * Función para buscar en el arreglo "data" los registros cuyo BIN
+       * comienza con la entrada del usuario. Muestra hasta 100 resultados.
+       */
+      function searchBin() {
+        const input = document.getElementById('binInput').value.trim();
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+        if (input.length === 0) {
+          resultsDiv.textContent = 'Por favor ingresa un BIN.';
+          return;
+        }
+        // Filtrar los datos que comienzan con el texto introducido.
+        const matches = data.filter((row) => row.BIN && row.BIN.startsWith(input));
+        if (matches.length === 0) {
+          resultsDiv.textContent = 'No se encontraron resultados.';
+          return;
+        }
+        // Crear la tabla y cabecera.
+        const table = document.createElement('table');
+        const headerRow = document.createElement('tr');
+        // Lista de columnas visibles. "IssuerUrl" no está incluida en la base de datos reducida.
+        const headers = [
+          'BIN',
+          'Brand',
+          'Type',
+          'Category',
+          'Issuer',
+          'IssuerPhone',
+          'isoCode2',
+          'isoCode3',
+          'CountryName',
+        ];
+        headers.forEach((h) => {
+          const th = document.createElement('th');
+          th.textContent = h;
+          headerRow.appendChild(th);
+        });
+        table.appendChild(headerRow);
+        // Agregar filas de resultados (máximo 100).
+        matches.slice(0, 100).forEach((row) => {
+          const tr = document.createElement('tr');
+          headers.forEach((h) => {
+            const td = document.createElement('td');
+            td.textContent = row[h] || '';
+            tr.appendChild(td);
+          });
+          table.appendChild(tr);
+        });
+        // Mostrar advertencia si hay más de 100 resultados.
+        if (matches.length > 100) {
+          const p = document.createElement('p');
+          p.textContent =
+            'Mostrando los primeros 100 resultados de ' +
+            matches.length +
+            '. Refina la búsqueda para obtener menos coincidencias.';
+          resultsDiv.appendChild(p);
+        }
+        resultsDiv.appendChild(table);
+      }
+    </script>
+  </body>
+</html>
