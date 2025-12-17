@@ -3,106 +3,632 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Buscador de BIN</title>
+    <title>Buscador avanzado de BIN</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 2rem;
-        line-height: 1.5;
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #1f2933;
+        --muted: #52606d;
+        --accent: #2563eb;
+        --border: #d8e2ec;
+        --shadow: 0 10px 35px rgba(31, 41, 51, 0.08);
       }
-      h1 {
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+
+      header {
+        background: linear-gradient(120deg, #111827, #1e3a8a);
+        color: #fff;
+        padding: 2.5rem 1.5rem 2rem;
+        box-shadow: var(--shadow);
+      }
+
+      header h1 {
+        margin: 0 0 0.75rem;
+        font-size: 2rem;
+      }
+
+      header p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.85);
+        max-width: 720px;
+      }
+
+      main {
+        margin: -60px auto 2.5rem;
+        max-width: 1200px;
+        padding: 0 1.25rem;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: var(--shadow);
+        padding: 1.5rem;
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        background: #eef2ff;
+        color: #1e3a8a;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
         margin-bottom: 1rem;
       }
-      input {
-        padding: 0.5rem;
-        font-size: 1rem;
-        width: 12rem;
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
       }
-      button {
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-        margin-left: 0.5rem;
+
+      .input-group label {
+        font-weight: 600;
+        color: #111827;
+        font-size: 0.95rem;
       }
+
+      .autocomplete-wrapper {
+        position: relative;
+      }
+
+      input[type='text'] {
+        padding: 0.65rem 0.8rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        font-size: 1rem;
+        background: #fdfefe;
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        width: 100%;
+      }
+
+      input[type='text']:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        background: #fff;
+      }
+
+      .suggestions {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        max-height: 220px;
+        overflow-y: auto;
+        padding: 0.25rem;
+        display: none;
+        z-index: 20;
+      }
+
+      .suggestions.visible {
+        display: block;
+      }
+
+      .suggestions button {
+        width: 100%;
+        text-align: left;
+        padding: 0.55rem 0.7rem;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      .suggestions button:hover,
+      .suggestions button.active {
+        background: #eef2ff;
+        color: #1e3a8a;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: flex-end;
+        margin-bottom: 0.5rem;
+      }
+
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: 700;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+      }
+
+      button.primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+      }
+
+      button.secondary {
+        background: #e5e7eb;
+        color: #111827;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.75rem 1.1rem;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      .helper-text {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .results-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+        margin: 1rem 0 0.5rem;
+        color: var(--muted);
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: var(--shadow);
+      }
+
       table {
         border-collapse: collapse;
         width: 100%;
-        margin-top: 1rem;
+        min-width: 800px;
       }
+
       th,
       td {
-        border: 1px solid #ddd;
-        padding: 0.5rem;
+        padding: 0.75rem 0.8rem;
+        border-bottom: 1px solid var(--border);
         text-align: left;
       }
+
       th {
-        background-color: #f7f7f7;
+        background: #f9fafb;
+        font-weight: 700;
       }
-      #loading {
-        margin-top: 1rem;
-        font-style: italic;
-        color: #555;
+
+      tbody tr:nth-child(2n) td {
+        background: #fbfdff;
+      }
+
+      .empty-state {
+        padding: 1rem;
+        border-radius: 12px;
+        background: #f9fafb;
+        border: 1px dashed var(--border);
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      @media (max-width: 640px) {
+        header h1 {
+          font-size: 1.6rem;
+        }
       }
     </style>
   </head>
   <body>
-    <h1>Buscador de BIN</h1>
-    <p>
-      Esta página permite buscar números de identificación bancaria (BIN) en la base de
-      datos suministrada. Introduce al menos 6 dígitos y presiona “Buscar”. La
-      carga inicial de datos puede tardar unos segundos debido al tamaño del
-      archivo.
-    </p>
-    <input type="text" id="binInput" placeholder="Introduce el BIN" />
-    <button onclick="searchBin()">Buscar</button>
-    <div id="loading">Cargando datos...</div>
-    <div id="results"></div>
+    <header>
+      <h1>Buscador avanzado de BIN</h1>
+      <p>
+        Busca por BIN o combina país, banco, marca, tipo y categoría con
+        autocompletado inteligente. Carga el CSV una sola vez y obtén resultados
+        al instante sin recargar la página.
+      </p>
+    </header>
 
-    <!-- Incluimos PapaParse para procesar el CSV en el navegador -->
+    <main>
+      <section class="card" aria-label="Buscador">
+        <div class="status-row" id="loadStatus">
+          <span class="pill">Cargando datos...</span>
+          <span>El archivo CSV se procesa en memoria para habilitar los filtros.</span>
+        </div>
+
+        <form id="searchForm">
+          <div class="filter-grid">
+            <div class="input-group">
+              <label for="binInput">BIN</label>
+              <input
+                id="binInput"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                placeholder="Ej. 457173"
+              />
+              <small class="helper-text">Coincidencia por prefijo.</small>
+            </div>
+
+            <div class="input-group">
+              <label for="countryInput">País (CountryName)</label>
+              <div class="autocomplete-wrapper">
+                <input
+                  id="countryInput"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Ej. United States"
+                />
+                <div class="suggestions" data-suggestions-for="countryInput"></div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="brandInput">Marca de tarjeta (Brand)</label>
+              <div class="autocomplete-wrapper">
+                <input
+                  id="brandInput"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Ej. VISA"
+                />
+                <div class="suggestions" data-suggestions-for="brandInput"></div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="typeInput">Tipo</label>
+              <div class="autocomplete-wrapper">
+                <input
+                  id="typeInput"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Credit, Debit, Prepaid..."
+                />
+                <div class="suggestions" data-suggestions-for="typeInput"></div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="categoryInput">Categoría / Nivel</label>
+              <div class="autocomplete-wrapper">
+                <input
+                  id="categoryInput"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Classic, Platinum..."
+                />
+                <div class="suggestions" data-suggestions-for="categoryInput"></div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="issuerInput">Banco / Issuer</label>
+              <div class="autocomplete-wrapper">
+                <input
+                  id="issuerInput"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Ej. JPMorgan Chase"
+                />
+                <div class="suggestions" data-suggestions-for="issuerInput"></div>
+              </div>
+            </div>
+
+            <div class="input-group">
+              <label for="iso2Input">Código ISO2</label>
+              <input
+                id="iso2Input"
+                type="text"
+                autocomplete="off"
+                placeholder="Ej. US"
+                maxlength="2"
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="iso3Input">Código ISO3</label>
+              <input
+                id="iso3Input"
+                type="text"
+                autocomplete="off"
+                placeholder="Ej. USA"
+                maxlength="3"
+              />
+            </div>
+
+            <div class="input-group">
+              <label for="phoneInput">Teléfono del banco</label>
+              <input
+                id="phoneInput"
+                type="text"
+                autocomplete="off"
+                placeholder="Coincidencia parcial"
+              />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="secondary" id="clearBtn">Limpiar</button>
+            <button type="submit" class="primary">Buscar</button>
+          </div>
+        </form>
+
+        <div class="results-meta" id="resultsMeta"></div>
+        <div id="results"></div>
+      </section>
+    </main>
+
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
     <script>
-      // Array para almacenar todas las filas del CSV una vez cargado.
-      let data = [];
-      // Cargar el archivo CSV bin-list-data.csv utilizando PapaParse. Este archivo
-      // ha sido reducido para no incluir la columna "IssuerUrl" y así cumplir
-      // con el límite de carga de GitHub (<25 MB).
-      Papa.parse('bin-list-data.csv', {
-        download: true,
-        header: true,
-        dynamicTyping: false,
-        skipEmptyLines: true,
-        complete: function (results) {
-          data = results.data;
-          // Una vez completada la carga, ocultamos el mensaje de carga.
-          document.getElementById('loading').style.display = 'none';
-        },
-        error: function () {
-          document.getElementById('loading').textContent =
-            'Error al cargar el archivo de datos.';
-        },
-      });
+      const state = {
+        data: [],
+        uniqueLists: {},
+        autocomplete: {},
+      };
 
-      /**
-       * Función para buscar en el arreglo "data" los registros cuyo BIN
-       * comienza con la entrada del usuario. Muestra hasta 100 resultados.
-       */
-      function searchBin() {
-        const input = document.getElementById('binInput').value.trim();
+      const autocompleteConfig = [
+        { inputId: 'countryInput', field: 'CountryName' },
+        { inputId: 'issuerInput', field: 'Issuer' },
+        { inputId: 'brandInput', field: 'Brand' },
+        { inputId: 'typeInput', field: 'Type' },
+        { inputId: 'categoryInput', field: 'Category' },
+      ];
+
+      const resultLimit = 200;
+
+      function updateLoadStatus(message, done = false) {
+        const container = document.getElementById('loadStatus');
+        if (done) {
+          container.innerHTML = `<span class="pill">Datos listos</span><span>${message}</span>`;
+        } else {
+          container.innerHTML = `<span class="pill">Cargando datos...</span><span>${message}</span>`;
+        }
+      }
+
+      function normalize(str) {
+        return (str || '').toString().trim();
+      }
+
+      function buildUniqueLists(dataset) {
+        const sets = {
+          CountryName: new Set(),
+          Issuer: new Set(),
+          Brand: new Set(),
+          Type: new Set(),
+          Category: new Set(),
+        };
+        dataset.forEach((row) => {
+          Object.keys(sets).forEach((key) => {
+            const value = normalize(row[key]);
+            if (value) {
+              sets[key].add(value);
+            }
+          });
+        });
+        const sortOpts = { sensitivity: 'base', usage: 'sort' };
+        const uniqueLists = {};
+        Object.entries(sets).forEach(([key, valueSet]) => {
+          uniqueLists[key] = Array.from(valueSet).sort((a, b) =>
+            a.localeCompare(b, 'es', sortOpts)
+          );
+        });
+        return uniqueLists;
+      }
+
+      function setupAutocomplete() {
+        autocompleteConfig.forEach(({ inputId, field }) => {
+          const input = document.getElementById(inputId);
+          const suggestionBox = document.querySelector(
+            `[data-suggestions-for="${inputId}"]`
+          );
+          state.autocomplete[inputId] = { activeIndex: -1, options: [] };
+
+          const renderSuggestions = (matches) => {
+            suggestionBox.innerHTML = '';
+            if (!matches.length) {
+              suggestionBox.classList.remove('visible');
+              return;
+            }
+            state.autocomplete[inputId].options = matches;
+            suggestionBox.classList.add('visible');
+            matches.forEach((match, index) => {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.textContent = match;
+              btn.addEventListener('click', () => {
+                input.value = match;
+                suggestionBox.classList.remove('visible');
+                suggestionBox.innerHTML = '';
+                state.autocomplete[inputId].activeIndex = -1;
+                runSearch();
+              });
+              suggestionBox.appendChild(btn);
+              if (index === state.autocomplete[inputId].activeIndex) {
+                btn.classList.add('active');
+              }
+            });
+          };
+
+          const handleInput = () => {
+            const query = normalize(input.value).toLowerCase();
+            state.autocomplete[inputId].activeIndex = -1;
+            if (!query) {
+              suggestionBox.classList.remove('visible');
+              suggestionBox.innerHTML = '';
+              return;
+            }
+            const list = state.uniqueLists[field] || [];
+            const matches = list
+              .filter((item) => item.toLowerCase().includes(query))
+              .slice(0, 10);
+            renderSuggestions(matches);
+          };
+
+          input.addEventListener('input', handleInput);
+          input.addEventListener('focus', handleInput);
+
+          input.addEventListener('keydown', (event) => {
+            const { options, activeIndex } = state.autocomplete[inputId];
+            if (!options.length) return;
+            if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+              event.preventDefault();
+              const direction = event.key === 'ArrowDown' ? 1 : -1;
+              const newIndex =
+                (activeIndex + direction + options.length) % options.length;
+              state.autocomplete[inputId].activeIndex = newIndex;
+              renderSuggestions(options);
+            }
+            if (event.key === 'Enter') {
+              const selection = options[activeIndex >= 0 ? activeIndex : 0];
+              if (selection) {
+                event.preventDefault();
+                input.value = selection;
+                suggestionBox.classList.remove('visible');
+                suggestionBox.innerHTML = '';
+                state.autocomplete[inputId].activeIndex = -1;
+                runSearch();
+              }
+            }
+            if (event.key === 'Escape') {
+              suggestionBox.classList.remove('visible');
+              suggestionBox.innerHTML = '';
+              state.autocomplete[inputId].activeIndex = -1;
+            }
+          });
+
+          input.addEventListener('blur', () => {
+            setTimeout(() => suggestionBox.classList.remove('visible'), 120);
+          });
+        });
+      }
+
+      function matchesField(value, filter) {
+        return normalize(value).toLowerCase().includes(filter);
+      }
+
+      function runSearch() {
         const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = '';
-        if (input.length === 0) {
-          resultsDiv.textContent = 'Por favor ingresa un BIN.';
+        const resultsMeta = document.getElementById('resultsMeta');
+        const filters = {
+          BIN: normalize(document.getElementById('binInput').value),
+          CountryName: normalize(document.getElementById('countryInput').value),
+          Issuer: normalize(document.getElementById('issuerInput').value),
+          Brand: normalize(document.getElementById('brandInput').value),
+          Type: normalize(document.getElementById('typeInput').value),
+          Category: normalize(document.getElementById('categoryInput').value),
+          isoCode2: normalize(document.getElementById('iso2Input').value),
+          isoCode3: normalize(document.getElementById('iso3Input').value),
+          IssuerPhone: normalize(document.getElementById('phoneInput').value),
+        };
+
+        if (!state.data.length) {
+          resultsDiv.innerHTML = '<div class="empty-state">Espera a que los datos terminen de cargar para buscar.</div>';
           return;
         }
-        // Filtrar los datos que comienzan con el texto introducido.
-        const matches = data.filter((row) => row.BIN && row.BIN.startsWith(input));
-        if (matches.length === 0) {
-          resultsDiv.textContent = 'No se encontraron resultados.';
+
+        const activeFilters = Object.values(filters).some((val) => val);
+        if (!activeFilters) {
+          resultsDiv.innerHTML = '<div class="empty-state">Introduce al menos un filtro para comenzar.</div>';
+          resultsMeta.textContent = '';
           return;
         }
-        // Crear la tabla y cabecera.
-        const table = document.createElement('table');
-        const headerRow = document.createElement('tr');
-        // Lista de columnas visibles. "IssuerUrl" no está incluida en la base de datos reducida.
+
+        const filtered = state.data.filter((row) => {
+          if (filters.BIN && !normalize(row.BIN).startsWith(filters.BIN)) return false;
+          if (
+            filters.CountryName &&
+            !matchesField(row.CountryName, filters.CountryName.toLowerCase())
+          )
+            return false;
+          if (
+            filters.Issuer &&
+            !matchesField(row.Issuer, filters.Issuer.toLowerCase())
+          )
+            return false;
+          if (
+            filters.Brand &&
+            !matchesField(row.Brand, filters.Brand.toLowerCase())
+          )
+            return false;
+          if (
+            filters.Type &&
+            !matchesField(row.Type, filters.Type.toLowerCase())
+          )
+            return false;
+          if (
+            filters.Category &&
+            !matchesField(row.Category, filters.Category.toLowerCase())
+          )
+            return false;
+          if (
+            filters.isoCode2 &&
+            !matchesField(row.isoCode2, filters.isoCode2.toLowerCase())
+          )
+            return false;
+          if (
+            filters.isoCode3 &&
+            !matchesField(row.isoCode3, filters.isoCode3.toLowerCase())
+          )
+            return false;
+          if (
+            filters.IssuerPhone &&
+            !matchesField(row.IssuerPhone, filters.IssuerPhone.toLowerCase())
+          )
+            return false;
+          return true;
+        });
+
+        const total = filtered.length;
+        const limited = filtered.slice(0, resultLimit);
+
+        resultsMeta.innerHTML = `Mostrando <strong>${limited.length}</strong> de <strong>${total}</strong> coincidencias${
+          total > resultLimit ? ` (limitado a ${resultLimit})` : ''
+        }.`;
+
+        if (!limited.length) {
+          resultsDiv.innerHTML = '<div class="empty-state">No se encontraron coincidencias con los filtros seleccionados.</div>';
+          return;
+        }
+
         const headers = [
           'BIN',
           'Brand',
@@ -110,37 +636,76 @@
           'Category',
           'Issuer',
           'IssuerPhone',
+          'CountryName',
           'isoCode2',
           'isoCode3',
-          'CountryName',
         ];
+
+        const tableWrapper = document.createElement('div');
+        tableWrapper.className = 'table-wrapper';
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
         headers.forEach((h) => {
           const th = document.createElement('th');
           th.textContent = h;
           headerRow.appendChild(th);
         });
-        table.appendChild(headerRow);
-        // Agregar filas de resultados (máximo 100).
-        matches.slice(0, 100).forEach((row) => {
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        limited.forEach((row) => {
           const tr = document.createElement('tr');
           headers.forEach((h) => {
             const td = document.createElement('td');
-            td.textContent = row[h] || '';
+            td.textContent = normalize(row[h]);
             tr.appendChild(td);
           });
-          table.appendChild(tr);
+          tbody.appendChild(tr);
         });
-        // Mostrar advertencia si hay más de 100 resultados.
-        if (matches.length > 100) {
-          const p = document.createElement('p');
-          p.textContent =
-            'Mostrando los primeros 100 resultados de ' +
-            matches.length +
-            '. Refina la búsqueda para obtener menos coincidencias.';
-          resultsDiv.appendChild(p);
-        }
-        resultsDiv.appendChild(table);
+        table.appendChild(tbody);
+        tableWrapper.appendChild(table);
+        resultsDiv.innerHTML = '';
+        resultsDiv.appendChild(tableWrapper);
       }
+
+      function clearFilters() {
+        document.getElementById('searchForm').reset();
+        document.getElementById('results').innerHTML = '';
+        document.getElementById('resultsMeta').textContent = '';
+        autocompleteConfig.forEach(({ inputId }) => {
+          const box = document.querySelector(`[data-suggestions-for="${inputId}"]`);
+          box.classList.remove('visible');
+          box.innerHTML = '';
+        });
+      }
+
+      document.getElementById('searchForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        runSearch();
+      });
+
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        clearFilters();
+        document.getElementById('binInput').focus();
+      });
+
+      Papa.parse('bin-list-data.csv', {
+        download: true,
+        header: true,
+        dynamicTyping: false,
+        skipEmptyLines: true,
+        complete: function (results) {
+          state.data = results.data;
+          state.uniqueLists = buildUniqueLists(state.data);
+          setupAutocomplete();
+          updateLoadStatus(`Datos cargados. Registros disponibles: ${state.data.length.toLocaleString()}.`, true);
+        },
+        error: function () {
+          updateLoadStatus('Error al cargar el archivo de datos.', false);
+        },
+      });
     </script>
   </body>
 </html>
